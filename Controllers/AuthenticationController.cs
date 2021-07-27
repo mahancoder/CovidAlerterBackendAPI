@@ -13,7 +13,6 @@ using BackendAPI.Models;
 namespace BackendAPI.Controllers
 {
     [ApiController]
-    [Route("/auth")]
     public class AuthenticationController : ControllerBase
     {
         private readonly UserDbContext Db = new UserDbContext();
@@ -24,16 +23,16 @@ namespace BackendAPI.Controllers
             _logger = logger;
         }
 
-        [HttpPost("/login")]
-        public async Task<string> Post(string Token)
+        [HttpPost("/auth/login")]
+        public async Task<string> Login([FromBody] string Token)
         {
             string GoogleId;
             string Email;
             using (HttpClient client = new HttpClient()) 
             {
                 dynamic json = JsonSerializer.Deserialize<dynamic>(await client.GetStringAsync($"https://oauth2.googleapis.com/tokeninfo?id_token={Token}"));
-                GoogleId = json.sub;
-                Email = json.email;
+                GoogleId = json.GetProperty("sub").ToString();
+                Email = json.GetProperty("email").ToString();
             }
             string SessionId;
             using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
@@ -54,8 +53,14 @@ namespace BackendAPI.Controllers
                 user.LastInteration = DateTime.Now;
                 Db.Users.Update(user);
             }
-            Db.SaveChanges();
+            await Db.SaveChangesAsync();
             return SessionId;
+        }
+        [HttpPost("/auth/logout")]
+        public async void Logout ([FromBody] string SessionId) 
+        {
+            Db.Users.Where(Usr => Usr.SessionId == SessionId).First().SessionId = null;
+            await Db.SaveChangesAsync();
         }
     }
 }
