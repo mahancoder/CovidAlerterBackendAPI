@@ -23,12 +23,12 @@ namespace BackendAPI.Controllers
             _logger = logger;
         }
 
-        [HttpPost("/auth/login")]
-        public async Task<string> Login([FromBody] string Token)
+        [HttpGet("/auth/login")]
+        public async Task<string> Login([FromQuery] string Token)
         {
             string GoogleId;
             string Email;
-            using (HttpClient client = new HttpClient()) 
+            using (HttpClient client = new HttpClient())
             {
                 dynamic json = JsonSerializer.Deserialize<dynamic>(await client.GetStringAsync($"https://oauth2.googleapis.com/tokeninfo?id_token={Token}"));
                 GoogleId = json.GetProperty("sub").ToString();
@@ -44,20 +44,27 @@ namespace BackendAPI.Controllers
             Db.Database.EnsureCreated();
             if (Db.Users.Where(User => User.GoogleId == GoogleId).ToList().Count < 1)
             {
-                Db.Users.Add(new User {GoogleId = GoogleId, SessionId = SessionId, LastInteration = DateTime.Now, Email = Email, TrackingAllowed = false});
+                Db.Users.Add(new User { GoogleId = GoogleId, SessionId = SessionId, LastInteration = DateTime.Now, Settings = new Settings { Email = Email, TrackingAllowed = false } });
             }
             else
             {
                 var user = Db.Users.First(usr => usr.GoogleId == GoogleId);
-                user.SessionId = SessionId;
+                if (user.SessionId == null)
+                {
+                    user.SessionId = SessionId;
+                }
+                else
+                {
+                    SessionId = user.SessionId;
+                }
                 user.LastInteration = DateTime.Now;
                 Db.Users.Update(user);
             }
             await Db.SaveChangesAsync();
             return SessionId;
         }
-        [HttpPost("/auth/logout")]
-        public async void Logout ([FromBody] string SessionId) 
+        [HttpGet("/auth/logout")]
+        public async void Logout([FromQuery] string SessionId)
         {
             Db.Users.Where(Usr => Usr.SessionId == SessionId).First().SessionId = null;
             await Db.SaveChangesAsync();

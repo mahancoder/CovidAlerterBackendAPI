@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace BackendAPI.Models
 {
@@ -10,8 +11,6 @@ namespace BackendAPI.Models
         public string GoogleId {get; set;}
         public string SessionId {get; set;}
         public DateTime LastInteration {get; set;}
-        [EmailAddress]
-        public string Email {get; set;}
-        public bool TrackingAllowed {get; set;}
+        public Settings Settings {get; set;}
     }
 }
