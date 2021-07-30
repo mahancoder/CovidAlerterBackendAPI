@@ -15,12 +15,13 @@ namespace BackendAPI.Controllers
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
-        private readonly UserDbContext Db = new UserDbContext();
+        private readonly APIDbContext Db;
         private readonly ILogger<AuthenticationController> _logger;
 
-        public AuthenticationController(ILogger<AuthenticationController> logger)
+        public AuthenticationController(ILogger<AuthenticationController> logger, APIDbContext dbContext)
         {
             _logger = logger;
+            Db = dbContext;
         }
 
         [HttpGet("/auth/login")]
@@ -41,10 +42,9 @@ namespace BackendAPI.Controllers
                 rng.GetBytes(CryptoBytes);
                 SessionId = Convert.ToBase64String(CryptoBytes);
             }
-            Db.Database.EnsureCreated();
             if (Db.Users.Where(User => User.GoogleId == GoogleId).ToList().Count < 1)
             {
-                Db.Users.Add(new User { GoogleId = GoogleId, SessionId = SessionId, LastInteration = DateTime.Now, Settings = new Settings { Email = Email, TrackingAllowed = false } });
+                Db.Users.Add(new User { GoogleId = GoogleId, SessionId = SessionId, LastInteration = DateTime.UtcNow, Settings = new Settings { Email = Email, TrackingAllowed = false } });
             }
             else
             {
@@ -57,7 +57,7 @@ namespace BackendAPI.Controllers
                 {
                     SessionId = user.SessionId;
                 }
-                user.LastInteration = DateTime.Now;
+                user.LastInteration = DateTime.UtcNow;
                 Db.Users.Update(user);
             }
             await Db.SaveChangesAsync();
@@ -66,7 +66,9 @@ namespace BackendAPI.Controllers
         [HttpGet("/auth/logout")]
         public async void Logout([FromQuery] string SessionId)
         {
-            Db.Users.Where(Usr => Usr.SessionId == SessionId).First().SessionId = null;
+            var usr = Db.Users.Where(Usr => Usr.SessionId == SessionId).First();
+            usr.SessionId = null;
+            usr.LastInteration = DateTime.UtcNow;
             await Db.SaveChangesAsync();
         }
     }

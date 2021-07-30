@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace BackendAPI.Models
 {
@@ -12,5 +13,6 @@ namespace BackendAPI.Models
         public string SessionId {get; set;}
         public DateTime LastInteration {get; set;}
         public Settings Settings {get; set;}
+        public List<Report> Reports { get; set; }
     }
 }

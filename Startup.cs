@@ -11,6 +11,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using BackendAPI.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Net.Mime;
 
 namespace BackendAPI
 {
@@ -27,7 +30,21 @@ namespace BackendAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
-            services.AddControllers();
+            services.AddControllers().ConfigureApiBehaviorOptions(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var result = new BadRequestObjectResult(context.ModelState);
+
+                    // TODO: add `using System.Net.Mime;` to resolve MediaTypeNames
+                    result.ContentTypes.Add(MediaTypeNames.Application.Json);
+                    result.ContentTypes.Add(MediaTypeNames.Application.Xml);
+
+                    return result;
+                };
+
+            });
+            services.AddDbContext<APIDbContext>(opt => opt.UseMySQL("Server=localhost;Database=CovidAlerter;Uid=root;Pwd=mahan1387;"));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BackendAPI", Version = "v1" });
