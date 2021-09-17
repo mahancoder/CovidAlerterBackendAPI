@@ -23,7 +23,7 @@ namespace BackendAPI.Controllers
         public async Task AddReport([FromQuery]string SessionId, [FromBody] Location location)
         {
             var usr = Db.Users.Where(usr => usr.SessionId == SessionId).First();
-            await Db.Reports.AddAsync(new Report {User = usr, Location = location});
+            await Db.Reports.AddAsync(new Report {User = usr, Longitude = location.Longitude, Latitude = location.Latitude});
             usr.LastInteration = System.DateTime.UtcNow;
             Db.Users.Update(usr);
             await Db.SaveChangesAsync();

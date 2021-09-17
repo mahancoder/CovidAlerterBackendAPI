@@ -11,10 +11,5 @@ namespace BackendAPI.Models
         public APIDbContext(DbContextOptions<APIDbContext> options) : base(options)
         {
         }
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<User>().Property(e => e.Settings).HasConversion(s => JsonSerializer.Serialize(s, null), s => JsonSerializer.Deserialize<Settings>(s, null));
-            modelBuilder.Entity<Report>().Property(e => e.Location).HasConversion(s => JsonSerializer.Serialize(s, null), s => JsonSerializer.Deserialize<Location>(s, null));
-        }
     }
 }
