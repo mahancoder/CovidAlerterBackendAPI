@@ -20,11 +20,12 @@ namespace BackendAPI.Controllers
             Db = dbContext;
         }
         [HttpPost("/report/submit")]
-        public async void AddReport([FromQuery]string SessionId, [FromBody] Location location)
+        public async Task AddReport([FromQuery]string SessionId, [FromBody] Location location)
         {
             var usr = Db.Users.Where(usr => usr.SessionId == SessionId).First();
-            Db.Reports.Add(new Report {User = usr, Location = location});
+            await Db.Reports.AddAsync(new Report {User = usr, Location = location});
             usr.LastInteration = System.DateTime.UtcNow;
+            Db.Users.Update(usr);
             await Db.SaveChangesAsync();
         }
     }

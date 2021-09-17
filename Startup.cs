@@ -13,6 +13,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using BackendAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using Pomelo.EntityFrameworkCore.MySql;
 using System.Net.Mime;
 
 namespace BackendAPI
@@ -44,7 +46,8 @@ namespace BackendAPI
                 };
 
             });
-            services.AddDbContext<APIDbContext>(opt => opt.UseMySQL("Server=localhost;Database=CovidAlerter;Uid=root;Pwd=mahan1387;"));
+            string ConnectionString = "Server=localhost;Database=CovidAlerter;Uid=root;Pwd=mahan1387;";
+            services.AddDbContext<APIDbContext>(optionsbuilder => optionsbuilder.UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString), o => o.EnableRetryOnFailure()));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BackendAPI", Version = "v1" });

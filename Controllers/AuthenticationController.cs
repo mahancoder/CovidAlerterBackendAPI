@@ -64,7 +64,7 @@ namespace BackendAPI.Controllers
             return SessionId;
         }
         [HttpGet("/auth/logout")]
-        public async void Logout([FromQuery] string SessionId)
+        public async Task Logout([FromQuery] string SessionId)
         {
             var usr = Db.Users.Where(Usr => Usr.SessionId == SessionId).First();
             usr.SessionId = null;
