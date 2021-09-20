@@ -5,6 +5,11 @@ using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using Newtonsoft.Json;
+using System;
 
 namespace BackendAPI.Controllers
 {
@@ -20,11 +25,53 @@ namespace BackendAPI.Controllers
             Db = dbContext;
         }
         [HttpPost("/report/submit")]
-        public async Task AddReport([FromQuery]string SessionId, [FromBody] Location location)
+        public async Task AddReport([FromQuery] string SessionId, [FromBody] Location location)
         {
+            var http = new HttpClient();
+            http.DefaultRequestHeaders.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue(productName: "CovidAlerter", productVersion: "1"));
+            string query = $"[out:json];\nis_in({location.Latitude}, {location.Longitude});\nout;";
+            var overpassresponse = await http.PostAsync("https://overpass-api.de/api/interpreter", new StringContent(query));
+            dynamic overpassobj = null;
+            try
+            {
+                overpassobj = JsonConvert.DeserializeObject<dynamic>(await overpassresponse.Content.ReadAsStringAsync());
+            }
+            catch
+            {
+                Console.WriteLine(await overpassresponse.Content.ReadAsStringAsync());
+            }
+            int biggest = 0;
+            string biggestid = "";
+            string biggestname = "";
+            foreach (var item in overpassobj.elements)
+            {
+                int temp = Convert.ToInt32(item.tags.admin_level);
+                if (temp > biggest)
+                {
+                    biggest = temp;
+                    biggestid = item.id;
+                    biggestname = item.tags.name;
+                }
+            }
             var usr = Db.Users.Where(usr => usr.SessionId == SessionId).First();
-            await Db.Reports.AddAsync(new Report {User = usr, Longitude = location.Longitude, Latitude = location.Latitude});
+            await Db.Reports.AddAsync(new Report { User = usr, Longitude = location.Longitude, Latitude = location.Latitude, NeighborhoodName = biggestname, NeighborhoodId = biggestid });
             usr.LastInteration = System.DateTime.UtcNow;
+            if (usr.LastLocationId != biggestid)
+            {
+                if (!Db.Neighbourhoods.Any(n => n.OSMId == biggestid))
+                {
+                    Db.Neighbourhoods.Add(new Neighbourhood { Name = biggestname, OSMId = biggestid, LiveCount = 1 });
+                }
+                else
+                {
+                    Db.Neighbourhoods.Where(f => f.OSMId == biggestid).First().LiveCount++;
+                }
+                if (usr.LastLocationId is not null)
+                {
+                    Db.Neighbourhoods.Where(f => f.OSMId == usr.LastLocationId).First().LiveCount--;
+                }
+                usr.LastLocationId = biggestid;
+            }
             Db.Users.Update(usr);
             await Db.SaveChangesAsync();
         }
