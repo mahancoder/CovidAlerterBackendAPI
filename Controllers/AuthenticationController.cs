@@ -44,7 +44,7 @@ namespace BackendAPI.Controllers
             }
             if (Db.Users.Where(User => User.GoogleId == GoogleId).ToList().Count < 1)
             {
-                Db.Users.Add(new User { GoogleId = GoogleId, SessionId = SessionId, LastInteration = DateTime.UtcNow, Settings = new Settings { Email = Email, TrackingAllowed = false } });
+                Db.Users.Add(new User { GoogleId = GoogleId, SessionId = SessionId, LastInteration = DateTime.UtcNow, Settings = new Settings { Email = Email, TrackingAllowed = false }, LastLocation = null });
             }
             else
             {

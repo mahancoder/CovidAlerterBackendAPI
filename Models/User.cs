@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BackendAPI.Models
 {
@@ -14,6 +15,8 @@ namespace BackendAPI.Models
         public DateTime LastInteration { get; set; }
         public Settings Settings { get; set; }
         public List<Report> Reports { get; set; }
-        public string LastLocationId { get; set; }
+        public int? LastLocationId { get; set; }
+        [ForeignKey("LastLocationId")]
+        public Neighbourhood LastLocation {get; set;}
     }
 }

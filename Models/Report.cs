@@ -11,7 +11,7 @@ namespace BackendAPI.Models
         public double Latitude { get; set; }
         public int UserId { get; set; }
         public User User { get; set; }
-        public string NeighborhoodName {get; set;}
-        public string NeighborhoodId {get; set;}
+        public int NeighbourhoodId {get; set;}
+        public Neighbourhood Neighbourhood {get; set;}
     }
 }

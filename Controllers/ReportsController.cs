@@ -53,25 +53,29 @@ namespace BackendAPI.Controllers
                     biggestname = item.tags.name;
                 }
             }
-            var usr = Db.Users.Where(usr => usr.SessionId == SessionId).First();
-            await Db.Reports.AddAsync(new Report { User = usr, Longitude = location.Longitude, Latitude = location.Latitude, NeighborhoodName = biggestname, NeighborhoodId = biggestid });
-            usr.LastInteration = System.DateTime.UtcNow;
-            if (usr.LastLocationId != biggestid)
+            Neighbourhood neighbourhood;
+            if (Db.Neighbourhoods.Any(n => n.OSMId == biggestid))
             {
-                if (!Db.Neighbourhoods.Any(n => n.OSMId == biggestid))
-                {
-                    Db.Neighbourhoods.Add(new Neighbourhood { Name = biggestname, OSMId = biggestid, LiveCount = 1 });
-                }
-                else
-                {
-                    Db.Neighbourhoods.Where(f => f.OSMId == biggestid).First().LiveCount++;
-                }
-                if (usr.LastLocationId is not null)
-                {
-                    Db.Neighbourhoods.Where(f => f.OSMId == usr.LastLocationId).First().LiveCount--;
-                }
-                usr.LastLocationId = biggestid;
+                neighbourhood = Db.Neighbourhoods.Where(n => n.OSMId == biggestid).First();
             }
+            else
+            {
+                neighbourhood = new Neighbourhood {Name = biggestname, OSMId = biggestid, LiveCount = 0};
+                Db.Neighbourhoods.Add(neighbourhood);
+            }
+            var usr = Db.Users.Where(usr => usr.SessionId == SessionId).First();
+            usr.LastInteration = System.DateTime.UtcNow;
+            if (usr.LastLocation != neighbourhood)
+            {
+                neighbourhood.LiveCount++;
+                if (usr.LastLocation is not null)
+                {
+                    usr.LastLocation.LiveCount--;
+                }
+                usr.LastLocation = neighbourhood;
+            }
+
+            await Db.Reports.AddAsync(new Report { User = usr, Longitude = location.Longitude, Latitude = location.Latitude, Neighbourhood = neighbourhood});
             Db.Users.Update(usr);
             await Db.SaveChangesAsync();
         }
