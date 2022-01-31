@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using BackendAPI.Models;
 using System.Text.Json;
 
 namespace BackendAPI.Models
@@ -14,7 +13,7 @@ namespace BackendAPI.Models
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>().Property(e => e.Settings).HasConversion(s => JsonSerializer.Serialize(s, null), s => JsonSerializer.Deserialize<Settings>(s, null));
+            modelBuilder.Entity<User>().Property(e => e.Settings).HasConversion(s => JsonSerializer.Serialize(s, (JsonSerializerOptions)null), s => JsonSerializer.Deserialize<Settings>(s, (JsonSerializerOptions)null));
         }
     }
 }
