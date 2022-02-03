@@ -13,5 +13,6 @@ namespace BackendAPI.Models
         public User User { get; set; }
         public int NeighbourhoodId {get; set;}
         public Neighbourhood Neighbourhood {get; set;}
+        public DateTime Timestamp { get; set; }
     }
 }

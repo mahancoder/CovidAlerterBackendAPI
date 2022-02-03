@@ -60,7 +60,7 @@ namespace BackendAPI.Controllers
             }
             else
             {
-                neighbourhood = new Neighbourhood {Name = biggestname, OSMId = biggestid, LiveCount = 0};
+                neighbourhood = new Neighbourhood { Name = biggestname, OSMId = biggestid, LiveCount = 0 };
                 Db.Neighbourhoods.Add(neighbourhood);
             }
             var usr = Db.Users.Where(usr => usr.SessionId == SessionId).First();
@@ -75,7 +75,7 @@ namespace BackendAPI.Controllers
                 usr.LastLocation = neighbourhood;
             }
 
-            await Db.Reports.AddAsync(new Report { User = usr, Longitude = location.Longitude, Latitude = location.Latitude, Neighbourhood = neighbourhood});
+            await Db.Reports.AddAsync(new Report { User = usr, Longitude = location.Longitude, Latitude = location.Latitude, Neighbourhood = neighbourhood, Timestamp = location.Timestamp });
             Db.Users.Update(usr);
             await Db.SaveChangesAsync();
         }

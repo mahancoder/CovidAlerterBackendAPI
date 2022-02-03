@@ -1,20 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using BackendAPI.Models;
 using Microsoft.EntityFrameworkCore;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-using Pomelo.EntityFrameworkCore.MySql;
 using System.Net.Mime;
 
 namespace BackendAPI
@@ -46,7 +38,7 @@ namespace BackendAPI
                 };
 
             });
-            string ConnectionString = "Server=localhost;Database=CovidAlerter;Uid=root;Pwd=mahan1387;";
+            string ConnectionString = "Server=localhost;Database=CovidAlerter;Uid=mahan;Pwd=mahan1387;";
             services.AddDbContext<APIDbContext>(optionsbuilder => optionsbuilder.UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString), o => o.EnableRetryOnFailure()));
             services.AddSwaggerGen(c =>
             {
