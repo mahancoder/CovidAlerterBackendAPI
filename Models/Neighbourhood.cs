@@ -8,6 +8,7 @@ namespace BackendAPI.Models
         public int LiveCount { get; set; }
         public string OSMId { get; set; }
         public bool HasChilds {get; set;}
+        public bool IsRelation {get; set;}
         public int? Ratio {get; set;}
         public List<User> Users {get; set;}
         public List<Report> Reports {get; set;}

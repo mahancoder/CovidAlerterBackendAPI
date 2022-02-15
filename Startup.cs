@@ -8,6 +8,10 @@ using Microsoft.OpenApi.Models;
 using BackendAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
+using System.IO;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using Npgsql;
 
 namespace BackendAPI
 {
@@ -38,8 +42,15 @@ namespace BackendAPI
                 };
 
             });
-            string ConnectionString = "Server=localhost;Database=CovidAlerter;Uid=mahan;Pwd=mahan1387;";
+            string DbName = "mysql";
+            
+            string ConnectionString = $"Server=localhost;Database=CovidAlerter;Uid=mahan;Pwd={JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("./passwords.json"))[DbName]};";
             services.AddDbContext<APIDbContext>(optionsbuilder => optionsbuilder.UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString), o => o.EnableRetryOnFailure()));
+            
+            DbName = "pgsql";
+            string PgConnectionString = $"Host=localhost;Username=mahan;Password={JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("./passwords.json"))[DbName]};Database=osm;";
+            services.AddSingleton(new NpgsqlConnection(PgConnectionString));
+            
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BackendAPI", Version = "v1" });
