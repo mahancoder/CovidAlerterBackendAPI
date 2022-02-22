@@ -19,20 +19,25 @@ namespace BackendAPI.Controllers
             _logger = logger;
             Db = dbContext;
             Pgsql = _Pgsql;
-            Pgsql.Open();
+            if (Pgsql.State == System.Data.ConnectionState.Closed)
+            {
+                Pgsql.Open();
+            }
         }
         [HttpPost("/report/submit")]
         public async Task AddReport([FromQuery] string SessionId, [FromBody] Location location)
         {
             string Id = "";
             string Name = "";
-            string query = 
-                // Query the neighbourhood's id and name
-                "SELECT neighbourhood.osm_id, neighbourhood.name FROM planet_osm_polygon AS neighbourhood " +
+            bool IsBig = false;
+            string query =
+                // Query the neighbourhood's id and name and place
+                "SELECT neighbourhood.osm_id, neighbourhood.name, neighbourhood.place " +
+                "FROM planet_osm_polygon AS neighbourhood " +
                 // Filter by the boundary tag
                 "WHERE (neighbourhood.boundary='administrative' OR neighbourhood.boundary='postal_code' OR " +
                 // Filter by the place tag
-                "neighbourhood.place='county' OR neighbourhood.place='municipality' OR neighbourhood.place='neighbourhood') " +
+                "neighbourhood.place='municipality' OR neighbourhood.place='neighbourhood') " +
                 // Where the nieghbourhood contains our point
                 "AND ST_Within(ST_Transform(ST_Point(@lon, @lat, 4326), 3857), neighbourhood.way) " +
                 // Get the smallest division
@@ -44,8 +49,9 @@ namespace BackendAPI.Controllers
                 await using (var reader = await cmd.ExecuteReaderAsync())
                 {
                     await reader.ReadAsync();
-                    Id = reader.GetString(0);
+                    Id = reader.GetInt64(0).ToString();
                     Name = reader.GetString(1);
+                    IsBig = reader.IsDBNull(2);
                 }
             }
 
@@ -56,7 +62,14 @@ namespace BackendAPI.Controllers
             }
             else
             {
-                neighbourhood = new Neighbourhood { Name = Name, OSMId = Id, LiveCount = 0, IsRelation = Id.StartsWith('-') };
+                neighbourhood = new Neighbourhood
+                {
+                    Name = Name,
+                    OSMId = Id,
+                    LiveCount = 0,
+                    IsRelation = Id.StartsWith('-'),
+                    IsBig = IsBig
+                };
                 Db.Neighbourhoods.Add(neighbourhood);
             }
             var usr = Db.Users.Where(usr => usr.SessionId == SessionId).First();

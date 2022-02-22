@@ -9,8 +9,11 @@ namespace BackendAPI.Models
         public string OSMId { get; set; }
         public bool HasChilds {get; set;}
         public bool IsRelation {get; set;}
-        public int? Ratio {get; set;}
+        public bool IsBig {get; set;}
+        public double? Ratio {get; set;}
         public List<User> Users {get; set;}
         public List<Report> Reports {get; set;}
+        public List<Neighbourhood> Parents { get; set; }
+        public List<Neighbourhood> Childs { get; set; }
     }
 }

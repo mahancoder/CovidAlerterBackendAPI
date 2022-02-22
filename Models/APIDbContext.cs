@@ -13,7 +13,14 @@ namespace BackendAPI.Models
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>().Property(e => e.Settings).HasConversion(s => JsonSerializer.Serialize(s, (JsonSerializerOptions)null), s => JsonSerializer.Deserialize<Settings>(s, (JsonSerializerOptions)null));
+            modelBuilder.Entity<User>().Property(e => e.Settings)
+                .HasConversion(s => 
+                    JsonSerializer.Serialize(s, (JsonSerializerOptions)null), s => 
+                            JsonSerializer.Deserialize<Settings>(s, (JsonSerializerOptions)null));
+            modelBuilder.Entity<Neighbourhood>()
+                .HasMany(c => c.Childs)
+                .WithMany(p => p.Parents)
+                .UsingEntity(j => j.ToTable("ChildParents"));
         }
     }
 }
