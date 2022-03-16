@@ -15,5 +15,6 @@ namespace BackendAPI.Models
         public List<Report> Reports {get; set;}
         public List<Neighbourhood> Parents { get; set; }
         public List<Neighbourhood> Childs { get; set; }
+        public List<ScoreLog> ScoreLogs { get; set; }
     }
 }

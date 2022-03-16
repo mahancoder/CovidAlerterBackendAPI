@@ -44,11 +44,21 @@ namespace BackendAPI
             });
             string DbName = "mysql";
             
-            string ConnectionString = $"Server=localhost;Database=CovidAlerter;Uid=mahan;Pwd={JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("./passwords.json"))[DbName]};";
-            services.AddDbContext<APIDbContext>(optionsbuilder => optionsbuilder.UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString), o => o.EnableRetryOnFailure()));
+            string ConnectionString = "Server=localhost;Database=CovidAlerter;Uid=mahan;Pwd=" +
+                JsonConvert.DeserializeObject<Dictionary<string, string>>(
+                    File.ReadAllText("./passwords.json")
+                )[DbName] +
+                ";";
+            services.AddDbContext<APIDbContext>(optionsbuilder => 
+                optionsbuilder.UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString), o => 
+                    o.EnableRetryOnFailure().UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
             
             DbName = "pgsql";
-            string PgConnectionString = $"Host=localhost;Username=mahan;Password={JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("./passwords.json"))[DbName]};Database=osm;";
+            string PgConnectionString = $"Host=localhost;Username=mahan;Password=" +
+                JsonConvert.DeserializeObject<Dictionary<string, string>>(
+                    File.ReadAllText("./passwords.json")
+                )[DbName] +
+            ";Database=osm;";
             services.AddSingleton(new NpgsqlConnection(PgConnectionString));
             
             services.AddSwaggerGen(c =>

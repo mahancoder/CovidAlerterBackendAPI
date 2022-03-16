@@ -8,6 +8,7 @@ namespace BackendAPI.Models
         public DbSet<User> Users { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Neighbourhood> Neighbourhoods { get; set; }
+        public DbSet<ScoreLog> ScoreLogs { get; set; }
         public APIDbContext(DbContextOptions<APIDbContext> options) : base(options)
         {
         }
