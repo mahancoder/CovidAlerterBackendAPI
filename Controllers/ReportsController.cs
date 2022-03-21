@@ -38,7 +38,7 @@ namespace BackendAPI.Controllers
                 "WHERE (neighbourhood.boundary='administrative' OR neighbourhood.boundary='postal_code' OR " +
                 // Filter by the place tag
                 "neighbourhood.place='municipality' OR neighbourhood.place='neighbourhood') " +
-                // Where the nieghbourhood contains our point
+                // Where our point is within the neighbourhood
                 "AND ST_Within(ST_Transform(ST_Point(@lon, @lat, 4326), 3857), neighbourhood.way) " +
                 // Get the smallest division
                 "ORDER BY neighbourhood.way_area ASC LIMIT 1;";

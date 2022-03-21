@@ -35,14 +35,15 @@ namespace BackendAPI.Controllers
             }
             string SessionId;
             SessionId = Convert.ToBase64String(RandomNumberGenerator.GetBytes(96));
-            if (Db.Users.Where(User => User.GoogleId == GoogleId).ToList().Count < 1)
+            if (!Db.Users.Where(User => User.GoogleId == GoogleId).ToList().Any())
             {
-                Db.Users.Add(new User { GoogleId = GoogleId, SessionId = SessionId, LastInteration = DateTime.UtcNow, Settings = new Settings { Email = Email, TrackingAllowed = false }, LastLocation = null });
+                Db.Users.Add(new User { GoogleId = GoogleId, SessionId = SessionId, LastInteration = DateTime.UtcNow,
+                    Settings = new Settings { Email = Email, TrackingAllowed = false }, LastLocation = null });
             }
             else
             {
                 var user = Db.Users.First(usr => usr.GoogleId == GoogleId);
-                if (user.SessionId == null)
+                if (string.IsNullOrWhiteSpace(user.SessionId))
                 {
                     user.SessionId = SessionId;
                 }
