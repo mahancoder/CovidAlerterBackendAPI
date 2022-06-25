@@ -58,6 +58,15 @@ Get the average score of all neighbourhoods inside a polygon.
 The polygon can either be a pre-defined polygon on the map, specified using its OSM Id or name
 Or a pair of lat, lon as a json list inside the body content of the requst
 
+#### `GET /get/score/batch?date=<date of the score>`
+Get a list of the score for each neighbourhood. To specify the neighbourhoods, either pass a list of OSM Ids or OSM Names as a body parameter.
+An optional boolean query parameter `IsName` can be provided to force the detection system to treat a list as a list of names or Ids.
+Note that because of how Asp.Net Core works, boolean values can only be passed as `true` or `false`, and`0` or `1` **won't work**
+
+An example of the raw body data for a list of OSM Ids:
+```json
+["546541582", "999293188"]
+```
 
 ## Database format
 
@@ -116,7 +125,6 @@ The `ScoreLogs` table consists of 4 columns:
 * `Date`: The date of the score record
 
 ## ToDo
-* Add more get endpoints for query multiple unrelated neighbourhoods at once
 * Implement the functionality to log out users for certian time of inactivity
 * Store settings using a different, more efficient method (possibly another table?)
 * Reformat and organize the code, and add more comments

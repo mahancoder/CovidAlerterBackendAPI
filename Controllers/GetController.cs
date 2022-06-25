@@ -302,5 +302,44 @@ namespace BackendAPI.Controllers
                 return neighbourhood.LiveCount;
             }
         }
+
+        [HttpGet("/get/score/batch")]
+        public async Task<List<float>> GetBatch([FromBody] List<string>? Values, [FromQuery] DateTime Date, [FromQuery] bool? IsName)
+        {
+            List<Neighbourhood> neighbourhoods = new List<Neighbourhood>();
+            // Filter out based on either names or OSM Ids
+            if (Values != null && Values.Any())
+            {
+                if (IsName == null)
+                {
+                    neighbourhoods = Db.Neighbourhoods.Include(n => n.ScoreLogs).Where(n => Values.Contains(n.OSMId)).ToList();
+                    if (!neighbourhoods.Any())
+                    {
+                        neighbourhoods = Db.Neighbourhoods.Include(n => n.ScoreLogs).Where(n => Values.Contains(n.Name)).ToList();
+                    }
+                }
+                else if (!(bool)IsName)
+                {
+                    neighbourhoods = Db.Neighbourhoods.Include(n => n.ScoreLogs).Where(n => Values.Contains(n.OSMId)).ToList();
+                }    
+                else
+                {
+                    neighbourhoods = Db.Neighbourhoods.Include(n => n.ScoreLogs).Where(n => Values.Contains(n.Name)).ToList();
+                }
+            }
+            else
+            {
+                return new List<float>{0};
+            }
+            if (!neighbourhoods.Any())
+            {
+                return new List<float>{0};
+            }
+            else
+            {
+                // Get the score
+                return neighbourhoods.Select(n => n.ScoreLogs).Select(s => s.Where(s => s.Date == Date).First().Score).ToList();
+            }
+        }
     }
 }
